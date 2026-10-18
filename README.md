@@ -1,4 +1,4 @@
-# Alea Pokemon API 🎮⚡
+Alea Pokemon API
 
 > A production-ready Spring Boot 3 REST API consuming [PokéAPI](https://pokeapi.co/api/v2/) to rank the top 5 Pokémon by weight, height, and base experience.
 
