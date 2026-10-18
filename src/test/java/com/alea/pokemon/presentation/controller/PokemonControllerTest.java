@@ -2,8 +2,11 @@ package com.alea.pokemon.presentation.controller;
 
 import com.alea.pokemon.application.dto.PokemonResponseDto;
 import com.alea.pokemon.application.service.PokemonRankingService;
+import com.alea.pokemon.application.strategy.RankingCriteria;
 import com.alea.pokemon.domain.exception.PokemonServiceUnavailableException;
+import com.alea.pokemon.presentation.converter.RankingSortByConverter;
 import com.alea.pokemon.presentation.filter.RequestLoggingFilter;
+import com.alea.pokemon.presentation.mapper.PokemonResponseMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -16,14 +19,17 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * MockMvc integration tests for {@link PokemonController}.
  * Uses {@code @WebMvcTest} to test only the web layer in isolation.
  */
 @WebMvcTest(PokemonController.class)
-@Import(RequestLoggingFilter.class)
+@Import({RequestLoggingFilter.class, PokemonResponseMapper.class, RankingSortByConverter.class})
 class PokemonControllerTest {
 
     @Autowired
@@ -40,13 +46,11 @@ class PokemonControllerTest {
             PokemonResponseDto.builder().id(788).name("tapu-fini").weight(212).height(13).baseExperience(175).build()
     );
 
-    // --- GET /api/v1/pokemon/heaviest ---
-
     @Test
-    void getHeaviestShouldReturn200WithPokemonList() throws Exception {
-        when(pokemonRankingService.getHeaviest()).thenReturn(SAMPLE_POKEMONS);
+    void getRankingByWeightShouldReturnPokemonList() throws Exception {
+        when(pokemonRankingService.getRanking(RankingCriteria.HEAVIEST)).thenReturn(SAMPLE_POKEMONS);
 
-        mockMvc.perform(get("/api/v1/pokemon/heaviest").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v1/pokemon").param("sortBy", "weight").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("X-Correlation-Id"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -57,66 +61,51 @@ class PokemonControllerTest {
     }
 
     @Test
-    void getHeaviestShouldReturn200WithEmptyArrayWhenNoPokemons() throws Exception {
-        when(pokemonRankingService.getHeaviest()).thenReturn(List.of());
+    void getRankingByHeightShouldUseHeightCriterion() throws Exception {
+        when(pokemonRankingService.getRanking(RankingCriteria.HIGHEST)).thenReturn(SAMPLE_POKEMONS);
 
-        mockMvc.perform(get("/api/v1/pokemon/heaviest").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v1/pokemon").param("sortBy", "height").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
-    }
-
-    // --- GET /api/v1/pokemon/highest ---
-
-    @Test
-    void getHighestShouldReturn200WithPokemonList() throws Exception {
-        when(pokemonRankingService.getHighest()).thenReturn(SAMPLE_POKEMONS);
-
-        mockMvc.perform(get("/api/v1/pokemon/highest").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(5))
                 .andExpect(jsonPath("$[1].name").value("wailord"));
     }
 
     @Test
-    void getHighestShouldReturn200WithEmptyArrayWhenNoPokemons() throws Exception {
-        when(pokemonRankingService.getHighest()).thenReturn(List.of());
+    void getRankingByExperienceShouldUseExperienceCriterion() throws Exception {
+        when(pokemonRankingService.getRanking(RankingCriteria.EXPERIENCE)).thenReturn(SAMPLE_POKEMONS);
 
-        mockMvc.perform(get("/api/v1/pokemon/highest").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
-    }
-
-    // --- GET /api/v1/pokemon/experience ---
-
-    @Test
-    void getExperienceShouldReturn200WithPokemonList() throws Exception {
-        when(pokemonRankingService.getTopExperience()).thenReturn(SAMPLE_POKEMONS);
-
-        mockMvc.perform(get("/api/v1/pokemon/experience").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v1/pokemon").param("sortBy", "experience").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(5))
                 .andExpect(jsonPath("$[0].baseExperience").value(189));
     }
 
     @Test
-    void getExperienceShouldReturn200WithEmptyArrayWhenNoPokemons() throws Exception {
-        when(pokemonRankingService.getTopExperience()).thenReturn(List.of());
+    void getRankingShouldReturnEmptyArrayWhenNoPokemons() throws Exception {
+        when(pokemonRankingService.getRanking(RankingCriteria.HEAVIEST)).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/v1/pokemon/experience").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v1/pokemon").param("sortBy", "weight").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
-    // --- Error handling via GlobalExceptionHandler ---
+    @Test
+    void getRankingShouldReturn400ProblemWhenSortByIsUnsupported() throws Exception {
+        mockMvc.perform(get("/api/v1/pokemon").param("sortBy", "speed").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value(
+                        "Invalid sortBy value 'speed'. Allowed values are: weight, height, experience."));
+    }
 
     @Test
-    void getHeaviestShouldReturn502WhenServiceUnavailable() throws Exception {
-        when(pokemonRankingService.getHeaviest())
+    void getRankingShouldReturn502WhenServiceUnavailable() throws Exception {
+        when(pokemonRankingService.getRanking(RankingCriteria.HEAVIEST))
                 .thenThrow(new PokemonServiceUnavailableException("PokéAPI is unreachable"));
 
-        mockMvc.perform(get("/api/v1/pokemon/heaviest").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v1/pokemon").param("sortBy", "weight").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadGateway())
                 .andExpect(content().contentType("application/problem+json"))
                 .andExpect(jsonPath("$.status").value(502))
@@ -124,34 +113,13 @@ class PokemonControllerTest {
     }
 
     @Test
-    void getHighestShouldReturn502WhenServiceUnavailable() throws Exception {
-        when(pokemonRankingService.getHighest())
-                .thenThrow(new PokemonServiceUnavailableException("Upstream failure"));
-
-        mockMvc.perform(get("/api/v1/pokemon/highest").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadGateway())
-                .andExpect(content().contentType("application/problem+json"));
-    }
-
-    @Test
-    void getExperienceShouldReturn502WhenServiceUnavailable() throws Exception {
-        when(pokemonRankingService.getTopExperience())
-                .thenThrow(new PokemonServiceUnavailableException("Upstream failure"));
-
-        mockMvc.perform(get("/api/v1/pokemon/experience").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadGateway())
-                .andExpect(content().contentType("application/problem+json"));
-    }
-
-    @Test
-    void getHeaviestShouldReturn500OnUnexpectedError() throws Exception {
-        when(pokemonRankingService.getHeaviest())
+    void getRankingShouldReturn500OnUnexpectedError() throws Exception {
+        when(pokemonRankingService.getRanking(RankingCriteria.HEAVIEST))
                 .thenThrow(new RuntimeException("Unexpected error"));
 
-        mockMvc.perform(get("/api/v1/pokemon/heaviest").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v1/pokemon").param("sortBy", "weight").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().contentType("application/problem+json"))
                 .andExpect(jsonPath("$.status").value(500));
     }
 }
-

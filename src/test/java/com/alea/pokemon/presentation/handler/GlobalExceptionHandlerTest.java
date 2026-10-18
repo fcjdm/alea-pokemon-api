@@ -66,4 +66,3 @@ class GlobalExceptionHandlerTest {
         assertThat(detail.getProperties()).containsKey("timestamp");
     }
 }
-

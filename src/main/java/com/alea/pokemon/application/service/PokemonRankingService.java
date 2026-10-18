@@ -52,33 +52,12 @@ public class PokemonRankingService {
     }
 
     /**
-     * Returns the top 5 heaviest Pokémon.
+     * Returns the top 5 Pokémon for the selected ranking criterion.
      *
-     * @return list of up to 5 {@link PokemonResponseDto} sorted by weight descending
+     * @param criteria ranking criterion to apply
+     * @return list of up to 5 {@link PokemonResponseDto} sorted in descending order
      */
-    public List<PokemonResponseDto> getHeaviest() {
-        return getRanking(RankingCriteria.HEAVIEST);
-    }
-
-    /**
-     * Returns the top 5 highest Pokémon.
-     *
-     * @return list of up to 5 {@link PokemonResponseDto} sorted by height descending
-     */
-    public List<PokemonResponseDto> getHighest() {
-        return getRanking(RankingCriteria.HIGHEST);
-    }
-
-    /**
-     * Returns the top 5 Pokémon with highest base experience.
-     *
-     * @return list of up to 5 {@link PokemonResponseDto} sorted by base experience descending
-     */
-    public List<PokemonResponseDto> getTopExperience() {
-        return getRanking(RankingCriteria.EXPERIENCE);
-    }
-
-    private List<PokemonResponseDto> getRanking(RankingCriteria criteria) {
+    public List<PokemonResponseDto> getRanking(RankingCriteria criteria) {
         RankingStrategy strategy = strategyMap.get(criteria);
         List<Pokemon> pokemons = pokemonPort.findAll(fetchLimit);
         return strategy.rank(pokemons, TOP_LIMIT).stream()
@@ -96,4 +75,3 @@ public class PokemonRankingService {
                 .build();
     }
 }
-

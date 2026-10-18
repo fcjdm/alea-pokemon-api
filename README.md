@@ -22,9 +22,7 @@ Developed to address every scenario and technical requirement from the **Alea Kn
 
 | Requirement | Implementation | Status |
 |---|---|:---:|
-| **Top 5 Heaviest** | `GET /api/v1/pokemon/heaviest` | ✅ |
-| **Top 5 Highest** | `GET /api/v1/pokemon/highest` | ✅ |
-| **Top 5 Base Experience** | `GET /api/v1/pokemon/experience` | ✅ |
+| **Top 5 by weight, height, or base experience** | `GET /api/v1/pokemon?sortBy={weight|height|experience}` | ✅ |
 | **Data Source** | PokéAPI (`https://pokeapi.co/api/v2/`) via `RestClient` | ✅ |
 | **Must have: Java / Spring Boot** | Java 17 + Spring Boot 3.3.4 | ✅ |
 | **Must have: Coverage ≥ 90%** | JaCoCo Quality Gate enforced on `mvn verify` (> 90% instruction coverage) | ✅ |
@@ -59,6 +57,9 @@ This service was built using **Google Antigravity** as an AI pair-programming as
 ### API-First Design (OpenAPI 3.0)
 Before writing any controller logic, I designed the contract in `src/main/resources/openapi/openapi.yml`. 
 Using `openapi-generator-maven-plugin`, the interfaces (`PokemonApi`) and DTOs (`PokemonResponse`) are automatically generated at compile time. This ensures 100% contract compliance, eliminates synchronization drift between frontend/backend, and instantly exposes live documentation via **Swagger UI**.
+
+### One Ranking Endpoint, Selected with `sortBy`
+The three ranking operations return the same resource representation and differ only in the attribute used for ordering. Modeling that choice as `GET /api/v1/pokemon?sortBy=...` keeps the API surface and OpenAPI contract smaller, avoids repeating nearly identical routing, response, and error definitions, and gives clients one consistent way to request a ranking. The allowed values (`weight`, `height`, and `experience`) are explicit in the contract; adding another ranking criterion can extend that selection without introducing another URL. Separate endpoints would be preferable if the rankings had meaningfully different resources, parameters, or response behavior.
 
 ### Test-Driven Development (TDD) & Quality Gate (> 90% Coverage)
 Testing was an integral part of the development cycle, following a TDD mindset:
@@ -120,10 +121,11 @@ docker run --rm -p 8080:8080 alea-pokemon-api
 
 ### Example Requests
 ```bash
-curl "http://localhost:8080/api/v1/pokemon/heaviest"
-curl "http://localhost:8080/api/v1/pokemon/highest"
-curl "http://localhost:8080/api/v1/pokemon/experience"
+curl "http://localhost:8080/api/v1/pokemon?sortBy=weight"
+curl "http://localhost:8080/api/v1/pokemon?sortBy=height"
+curl "http://localhost:8080/api/v1/pokemon?sortBy=experience"
 ```
+`sortBy` accepts only `weight`, `height`, or `experience`; unsupported values return HTTP 400 with an RFC 7807 response.
 
 ---
 ---
@@ -136,9 +138,7 @@ Desarrollado para cubrir todos los escenarios y requisitos técnicos planteados 
 
 | Requisito | Implementación | Estado |
 |---|---|:---:|
-| **Top 5 más pesados** | `GET /api/v1/pokemon/heaviest` | ✅ |
-| **Top 5 más altos** | `GET /api/v1/pokemon/highest` | ✅ |
-| **Top 5 más experiencia base** | `GET /api/v1/pokemon/experience` | ✅ |
+| **Top 5 por peso, altura o experiencia base** | `GET /api/v1/pokemon?sortBy={weight|height|experience}` | ✅ |
 | **Fuente de datos** | PokéAPI (`https://pokeapi.co/api/v2/`) mediante `RestClient` | ✅ |
 | **Must have: Java / Spring Boot** | Java 17 + Spring Boot 3.3.4 | ✅ |
 | **Must have: Cobertura ≥ 90%** | Quality Gate de JaCoCo en `mvn verify` (> 90% en cobertura de instrucciones) | ✅ |
@@ -173,6 +173,9 @@ El servicio se construyó utilizando **Google Antigravity** como asistente de pa
 ### Enfoque API-First (OpenAPI 3.0)
 Antes de escribir una sola línea en el controlador, diseñé el contrato en `src/main/resources/openapi/openapi.yml`.
 Con el plugin `openapi-generator-maven-plugin`, las interfaces (`PokemonApi`) y los DTOs (`PokemonResponse`) se autogeneran en tiempo de compilación. Esto asegura fidelidad total al contrato, evita desajustes entre frontend y backend, y proporciona documentación interactiva inmediata con **Swagger UI**.
+
+### Un endpoint de ranking seleccionado con `sortBy`
+Las tres operaciones devuelven la misma representación de recurso y solo se diferencian por el atributo de ordenamiento. Expresar esa selección como `GET /api/v1/pokemon?sortBy=...` reduce la superficie de la API y el contrato OpenAPI, evita repetir rutas y definiciones casi idénticas de respuesta y errores, y ofrece a los clientes una forma consistente de pedir rankings. Los valores admitidos (`weight`, `height` y `experience`) están declarados explícitamente en el contrato; añadir otro criterio permite ampliar esa selección sin crear otra URL. Los endpoints separados serían preferibles si los rankings tuvieran recursos, parámetros o comportamientos de respuesta realmente distintos.
 
 ### Test-Driven Development (TDD) y Quality Gate (> 90% Cobertura)
 Las pruebas fueron el núcleo del desarrollo, siguiendo una filosofía TDD:
@@ -234,7 +237,8 @@ docker run --rm -p 8080:8080 alea-pokemon-api
 
 ### Ejemplos de Peticiones
 ```bash
-curl "http://localhost:8080/api/v1/pokemon/heaviest"
-curl "http://localhost:8080/api/v1/pokemon/highest"
-curl "http://localhost:8080/api/v1/pokemon/experience"
+curl "http://localhost:8080/api/v1/pokemon?sortBy=weight"
+curl "http://localhost:8080/api/v1/pokemon?sortBy=height"
+curl "http://localhost:8080/api/v1/pokemon?sortBy=experience"
 ```
+`sortBy` solo admite `weight`, `height` o `experience`; los valores no admitidos devuelven HTTP 400 con una respuesta RFC 7807.

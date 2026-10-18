@@ -3,11 +3,17 @@ package com.alea.pokemon.presentation.handler;
 import com.alea.pokemon.domain.exception.PokemonNotFoundException;
 import com.alea.pokemon.domain.exception.PokemonServiceUnavailableException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.beans.TypeMismatchException;
 
 import java.net.URI;
 import java.time.Instant;
@@ -28,6 +34,23 @@ import java.time.Instant;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final URI BLANK_TYPE = URI.create("about:blank");
+
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(
+            TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        if (ex instanceof MethodArgumentTypeMismatchException mismatch
+                && "sortBy".equals(mismatch.getName())) {
+            String detail = "Invalid sortBy value '" + mismatch.getValue()
+                    + "'. Allowed values are: weight, height, experience.";
+            log.warn("Invalid ranking criterion: {}", detail);
+            ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+            problemDetail.setType(BLANK_TYPE);
+            problemDetail.setTitle("Bad Request");
+            problemDetail.setProperty("timestamp", Instant.now().toString());
+            return createResponseEntity(problemDetail, headers, HttpStatus.BAD_REQUEST, request);
+        }
+        return super.handleTypeMismatch(ex, headers, status, request);
+    }
 
     /**
      * Handles {@link PokemonNotFoundException} — returns 404 with RFC 7807 body.
@@ -70,4 +93,3 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 }
-
