@@ -48,10 +48,8 @@ For any new feature, architectural modification, or refactor:
 3. **Incremental Execution:** Execute tasks step-by-step, running tests at each phase.
 4. **Archive & Sync:** Once all tasks and tests pass verify, archive or sync the change using OpenSpec tooling to maintain an audit trail.
 
-## 4. Required Endpoints
-- `GET /api/v1/pokemon/heaviest`: Top 5 heaviest Pokémons.
-- `GET /api/v1/pokemon/highest`: Top 5 highest Pokémons.
-- `GET /api/v1/pokemon/experience`: Top 5 Pokémons with highest base experience.
+## 4. Required Endpoint
+- `GET /api/v1/pokemon?sortBy={weight|height|experience}`: Top 5 Pokémon sorted by the selected attribute; unsupported values return HTTP 400 with RFC 7807 Problem Details.
 
 ## 5. Documentation Requirements (README.md)
 The `README.md` file MUST maintain:

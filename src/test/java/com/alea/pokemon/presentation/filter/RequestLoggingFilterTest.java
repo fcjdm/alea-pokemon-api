@@ -42,7 +42,7 @@ class RequestLoggingFilterTest {
     void shouldGenerateCorrelationIdWhenHeaderIsMissing() throws ServletException, IOException {
         when(request.getHeader(RequestLoggingFilter.CORRELATION_ID_HEADER)).thenReturn(null);
         when(request.getMethod()).thenReturn("GET");
-        when(request.getRequestURI()).thenReturn("/api/v1/pokemon/heaviest");
+        when(request.getRequestURI()).thenReturn("/api/v1/pokemon");
         when(response.getStatus()).thenReturn(200);
 
         filter.doFilterInternal(request, response, filterChain);
@@ -60,7 +60,7 @@ class RequestLoggingFilterTest {
         String existingId = "client-trace-abc-123";
         when(request.getHeader(RequestLoggingFilter.CORRELATION_ID_HEADER)).thenReturn(existingId);
         when(request.getMethod()).thenReturn("GET");
-        when(request.getRequestURI()).thenReturn("/api/v1/pokemon/highest");
+        when(request.getRequestURI()).thenReturn("/api/v1/pokemon");
         when(response.getStatus()).thenReturn(200);
 
         filter.doFilterInternal(request, response, filterChain);
@@ -74,7 +74,7 @@ class RequestLoggingFilterTest {
     void shouldGenerateNewCorrelationIdWhenHeaderIsBlank() throws ServletException, IOException {
         when(request.getHeader(RequestLoggingFilter.CORRELATION_ID_HEADER)).thenReturn("   ");
         when(request.getMethod()).thenReturn("GET");
-        when(request.getRequestURI()).thenReturn("/api/v1/pokemon/experience");
+        when(request.getRequestURI()).thenReturn("/api/v1/pokemon");
         when(response.getStatus()).thenReturn(200);
 
         filter.doFilterInternal(request, response, filterChain);
@@ -91,7 +91,7 @@ class RequestLoggingFilterTest {
     void shouldCleanUpMdcEvenWhenFilterChainThrowsException() throws ServletException, IOException {
         when(request.getHeader(RequestLoggingFilter.CORRELATION_ID_HEADER)).thenReturn(null);
         when(request.getMethod()).thenReturn("GET");
-        when(request.getRequestURI()).thenReturn("/api/v1/pokemon/heaviest");
+        when(request.getRequestURI()).thenReturn("/api/v1/pokemon");
         when(response.getStatus()).thenReturn(500);
 
         doThrow(new ServletException("Downstream error")).when(filterChain).doFilter(request, response);
@@ -103,4 +103,3 @@ class RequestLoggingFilterTest {
         assertThat(MDC.get(RequestLoggingFilter.CORRELATION_ID_MDC_KEY)).isNull();
     }
 }
-

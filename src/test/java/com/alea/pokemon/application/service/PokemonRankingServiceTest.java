@@ -4,6 +4,7 @@ import com.alea.pokemon.application.dto.PokemonResponseDto;
 import com.alea.pokemon.application.strategy.ExperienceRankingStrategy;
 import com.alea.pokemon.application.strategy.HeaviestRankingStrategy;
 import com.alea.pokemon.application.strategy.HighestRankingStrategy;
+import com.alea.pokemon.application.strategy.RankingCriteria;
 import com.alea.pokemon.application.strategy.RankingStrategy;
 import com.alea.pokemon.domain.exception.PokemonServiceUnavailableException;
 import com.alea.pokemon.domain.model.Pokemon;
@@ -64,7 +65,7 @@ class PokemonRankingServiceTest {
     void getHeaviestShouldReturnTop5ByWeight() {
         when(pokemonPort.findAll(anyInt())).thenReturn(samplePokemons);
 
-        List<PokemonResponseDto> result = service.getHeaviest();
+        List<PokemonResponseDto> result = service.getRanking(RankingCriteria.HEAVIEST);
 
         assertThat(result).hasSize(5);
         assertThat(result.get(0).getName()).isEqualTo("snorlax");   // 4600
@@ -78,7 +79,7 @@ class PokemonRankingServiceTest {
     void getHighestShouldReturnTop5ByHeight() {
         when(pokemonPort.findAll(anyInt())).thenReturn(samplePokemons);
 
-        List<PokemonResponseDto> result = service.getHighest();
+        List<PokemonResponseDto> result = service.getRanking(RankingCriteria.HIGHEST);
 
         assertThat(result).hasSize(5);
         assertThat(result.get(0).getName()).isEqualTo("wailord");   // 145
@@ -92,7 +93,7 @@ class PokemonRankingServiceTest {
     void getTopExperienceShouldReturnTop5ByBaseExperience() {
         when(pokemonPort.findAll(anyInt())).thenReturn(samplePokemons);
 
-        List<PokemonResponseDto> result = service.getTopExperience();
+        List<PokemonResponseDto> result = service.getRanking(RankingCriteria.EXPERIENCE);
 
         assertThat(result).hasSize(5);
         assertThat(result.get(0).getName()).isEqualTo("charizard"); // 267
@@ -107,7 +108,7 @@ class PokemonRankingServiceTest {
                 Pokemon.builder().id(6).name("charizard").weight(905).height(17).baseExperience(267).build()
         ));
 
-        List<PokemonResponseDto> result = service.getHeaviest();
+        List<PokemonResponseDto> result = service.getRanking(RankingCriteria.HEAVIEST);
 
         assertThat(result).hasSize(1);
         PokemonResponseDto dto = result.get(0);
@@ -122,7 +123,7 @@ class PokemonRankingServiceTest {
     void getHeaviestShouldReturnEmptyListWhenPortReturnsEmpty() {
         when(pokemonPort.findAll(anyInt())).thenReturn(List.of());
 
-        List<PokemonResponseDto> result = service.getHeaviest();
+        List<PokemonResponseDto> result = service.getRanking(RankingCriteria.HEAVIEST);
 
         assertThat(result).isEmpty();
     }
@@ -132,9 +133,8 @@ class PokemonRankingServiceTest {
         when(pokemonPort.findAll(anyInt()))
                 .thenThrow(new PokemonServiceUnavailableException("PokéAPI is down"));
 
-        assertThatThrownBy(() -> service.getHeaviest())
+        assertThatThrownBy(() -> service.getRanking(RankingCriteria.HEAVIEST))
                 .isInstanceOf(PokemonServiceUnavailableException.class)
                 .hasMessageContaining("PokéAPI is down");
     }
 }
-

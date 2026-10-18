@@ -99,9 +99,11 @@
                         </configOptions>
                         <importMappings>
                             <importMapping>ProblemDetail=org.springframework.http.ProblemDetail</importMapping>
+                            <importMapping>RankingSortBy=com.alea.pokemon.application.strategy.RankingCriteria</importMapping>
                         </importMappings>
                         <schemaMappings>
                             <schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping>
+                            <schemaMapping>RankingSortBy=com.alea.pokemon.application.strategy.RankingCriteria</schemaMapping>
                         </schemaMappings>
                     </configuration>
                 </execution>
