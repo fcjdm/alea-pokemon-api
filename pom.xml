@@ -73,6 +73,41 @@
             <artifactId>spring-boot-maven-plugin</artifactId>
         </plugin>
         
+        <!-- OpenAPI Generator Plugin -->
+        <plugin>
+            <groupId>org.openapitools</groupId>
+            <artifactId>openapi-generator-maven-plugin</artifactId>
+            <version>7.8.0</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>generate</goal>
+                    </goals>
+                    <configuration>
+                        <inputSpec>${project.basedir}/src/main/resources/openapi/openapi.yml</inputSpec>
+                        <generatorName>spring</generatorName>
+                        <apiPackage>com.alea.pokemon.presentation.api</apiPackage>
+                        <modelPackage>com.alea.pokemon.presentation.dto</modelPackage>
+                        <configOptions>
+                            <interfaceOnly>true</interfaceOnly>
+                            <useSpringBoot3>true</useSpringBoot3>
+                            <useJakartaEe>true</useJakartaEe>
+                            <openApiNullable>false</openApiNullable>
+                            <skipDefaultInterface>true</skipDefaultInterface>
+                            <useTags>true</useTags>
+                            <documentationProvider>springdoc</documentationProvider>
+                        </configOptions>
+                        <importMappings>
+                            <importMapping>ProblemDetail=org.springframework.http.ProblemDetail</importMapping>
+                        </importMappings>
+                        <schemaMappings>
+                            <schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping>
+                        </schemaMappings>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+
         <!-- JaCoCo Code Coverage Plugin -->
         <plugin>
             <groupId>org.jacoco</groupId>
@@ -110,6 +145,17 @@
                                 </limits>
                             </rule>
                         </rules>
+                        <excludes>
+                            <!-- Exclude Lombok-generated boilerplate and pure config/DTO classes -->
+                            <exclude>com/alea/pokemon/AleaPokemonApiApplication.class</exclude>
+                            <exclude>com/alea/pokemon/application/dto/**</exclude>
+                            <exclude>com/alea/pokemon/infrastructure/adapter/pokeapi/dto/**</exclude>
+                            <exclude>com/alea/pokemon/infrastructure/config/PokeApiProperties.class</exclude>
+                            <exclude>com/alea/pokemon/application/strategy/RankingCriteria.class</exclude>
+                            <!-- OpenAPI generated interfaces and DTOs -->
+                            <exclude>com/alea/pokemon/presentation/api/**</exclude>
+                            <exclude>com/alea/pokemon/presentation/dto/**</exclude>
+                        </excludes>
                     </configuration>
                 </execution>
             </executions>

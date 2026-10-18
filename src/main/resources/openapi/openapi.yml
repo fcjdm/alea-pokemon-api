@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  title: Alea Pokémon API
+  description: API for retrieving top statistical rankings of Pokémon (heaviest, highest, and base experience) consuming PokéAPI.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+paths:
+  /api/v1/pokemon/heaviest:
+    get:
+      tags:
+        - Pokemon
+      summary: Get top 5 heaviest Pokémon
+      description: Returns the top 5 Pokémon sorted in descending order by weight.
+      operationId: getHeaviestPokemons
+      responses:
+        '200':
+          description: Successful retrieval of top 5 heaviest Pokémon
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PokemonResponse'
+        '502':
+          description: Upstream PokéAPI failure
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/v1/pokemon/highest:
+    get:
+      tags:
+        - Pokemon
+      summary: Get top 5 highest Pokémon
+      description: Returns the top 5 Pokémon sorted in descending order by height.
+      operationId: getHighestPokemons
+      responses:
+        '200':
+          description: Successful retrieval of top 5 highest Pokémon
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PokemonResponse'
+        '502':
+          description: Upstream PokéAPI failure
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/v1/pokemon/experience:
+    get:
+      tags:
+        - Pokemon
+      summary: Get top 5 Pokémon with highest base experience
+      description: Returns the top 5 Pokémon sorted in descending order by base experience.
+      operationId: getExperiencePokemons
+      responses:
+        '200':
+          description: Successful retrieval of top 5 base experience Pokémon
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PokemonResponse'
+        '502':
+          description: Upstream PokéAPI failure
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+components:
+  schemas:
+    PokemonResponse:
+      type: object
+      required:
+        - id
+        - name
+        - weight
+        - height
+        - baseExperience
+      properties:
+        id:
+          type: integer
+          example: 6
+        name:
+          type: string
+          example: "charizard"
+        weight:
+          type: integer
+          description: Weight in hectograms
+          example: 905
+        height:
+          type: integer
+          description: Height in decimeters
+          example: 17
+        baseExperience:
+          type: integer
+          description: Base experience points
+          example: 267
+
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          example: "about:blank"
+        title:
+          type: string
+          example: "Bad Gateway"
+        status:
+          type: integer
+          example: 502
+        detail:
+          type: string
+          example: "Failed to fetch Pokémon data from upstream service"
+        instance:
+          type: string
+          format: uri
+          example: "/api/v1/pokemon/heaviest"

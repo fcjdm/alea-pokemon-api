@@ -1,3 +1,25 @@
 spring:
   application:
     name: alea-pokemon-api
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+  # Point springdoc at our hand-authored OpenAPI spec
+  swagger-ui.url: /api-docs
+
+pokeapi:
+  base-url: https://pokeapi.co/api/v2
+  timeout-seconds: 10
+  # Number of Pokemon fetched from the list endpoint (covers all ~1300+)
+  fetch-limit: 100
+
+logging:
+  level:
+    root: INFO
+    com.alea.pokemon: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{correlationId:-none}] - %msg%n"
+
