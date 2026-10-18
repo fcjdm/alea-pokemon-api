@@ -22,7 +22,7 @@ Developed to address every scenario and technical requirement from the **Alea Kn
 
 | Requirement | Implementation | Status |
 |---|---|:---:|
-| **Top 5 by weight, height, or base experience** | `GET /api/v1/pokemon?sortBy={weight|height|experience}` | ✅ |
+| **Top 5 by weight, height, or base experience** | `GET /api/v1/pokemon?sortBy={weight, height, experience}` | ✅ |
 | **Data Source** | PokéAPI (`https://pokeapi.co/api/v2/`) via `RestClient` | ✅ |
 | **Must have: Java / Spring Boot** | Java 17 + Spring Boot 3.3.4 | ✅ |
 | **Must have: Coverage ≥ 90%** | JaCoCo Quality Gate enforced on `mvn verify` (> 90% instruction coverage) | ✅ |
@@ -138,7 +138,7 @@ Desarrollado para cubrir todos los escenarios y requisitos técnicos planteados 
 
 | Requisito | Implementación | Estado |
 |---|---|:---:|
-| **Top 5 por peso, altura o experiencia base** | `GET /api/v1/pokemon?sortBy={weight|height|experience}` | ✅ |
+| **Top 5 por peso, altura o experiencia base** | `GET /api/v1/pokemon?sortBy={weight, height, experience}` | ✅ |
 | **Fuente de datos** | PokéAPI (`https://pokeapi.co/api/v2/`) mediante `RestClient` | ✅ |
 | **Must have: Java / Spring Boot** | Java 17 + Spring Boot 3.3.4 | ✅ |
 | **Must have: Cobertura ≥ 90%** | Quality Gate de JaCoCo en `mvn verify` (> 90% en cobertura de instrucciones) | ✅ |
